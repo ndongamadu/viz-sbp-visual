@@ -1220,17 +1220,14 @@ h4 {
 
 #legend {
   background-color: #FFF;
-  top: 360px;
+  right: 10px;
   color: #000;
   opacity: 0.8;
   padding-left: 5px;
   padding-top: 5px;
-  left: 700px;
+  bottom: 10px;
   width: 130px;
-  position: absolute;
-  /*.scale {
-  		transform: translate(10, 30px);
-  	}*/ }
+  position: absolute; }
   #legend .label {
     fill: #000;
     font-size: 12px; }
@@ -1265,6 +1262,9 @@ h4 {
 #nochart {
   font-size: 12px; }
 
+.pie h3 {
+  height: 40px; }
+
 .barchart .tick {
   font-size: 12px; }
 
@@ -1295,7 +1295,7 @@ footer {
   color: #FFF;
   padding: 20px 0 10px;
   opacity: 0;
-  margin-top: 10px; }
+  margin-top: 30px; }
 
 .logos img {
   margin-right: 40px;

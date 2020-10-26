@@ -292,8 +292,8 @@ function choroplethMap() {
     var div = d3.select('#map');
     var svg = div.append('svg')
     	.attr('id', 'legend')
-      	.attr('height', '115px')
-      	.attr("transform", "translate(5, -80)");
+      	.attr('height', '115px');
+      	//.attr("transform", "translate(5, -80)");
     
     svg.append('g')
       .attr('class', 'scale')

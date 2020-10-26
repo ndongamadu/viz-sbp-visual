@@ -19,7 +19,7 @@ function drawRankingChart(data) {
 	//clone data
   	var dataPlus = [...data];
   	dataPlus.unshift({key: "Global", value: total });
-
+  	maxVal = dataPlus[0].value; 
 	var divide = (maxVal > 1000) ? 1000 : 1;
 	var x = d3.scaleLinear()
 	    .domain([0, maxVal])
@@ -69,7 +69,6 @@ function drawRankingChart(data) {
 	    .attr('height', barHeight)
 	    .attr('width', function(d) {
 	    	var w = x(d.value);
-	    	if (w > x(maxVal)) w = x(maxVal)+10;
       		if (w<0) w = 0;
       		return w;
 	    });
@@ -82,7 +81,7 @@ function drawRankingChart(data) {
 	    })
 	    .attr('y', function(d) { return -labelOffset; })
 	    .text(function (d) {
-	      return d3.format('d')(d.value);
+	      return d3.format(',')(d.value);
 	    });
 
 	bars.append('text')
@@ -550,20 +549,31 @@ $( document ).ready(function() {
 
     var tipPays = d3.select('#pays').selectAll('path') 
           .on("mousemove", function(d){ 
+            var select = $('#rankingSelect').val();
             var countryData = sbpFilteredData.filter(c => c['ISO3 code'] == d.properties.ISO_A3);
             if (countryData.length != 0) {
               var orgs = [];
               countryData.forEach( function(element, index) {
                 orgs.includes(element['Organization']) ? '' : orgs.push(element['Organization']);
               });
+              
+              var content = '<h4>' + d.properties.NAME_LONG + '</h4>';
+
+              if (select =="days") {
+                var dataByMetric = d3.nest()
+                    .key(function(d){ return d['ISO3 code']; })
+                    .rollup(function(v) { return d3.sum(v, function(d) { return d['Total Days']; }); })
+                    .entries(countryData);
+                content += 'Deployments (Days): ' + numFormat(dataByMetric[0].value) + '<br/>';
+              } else {
+                content += 'Deployments: ' + numFormat(countryData.length) + '<br/>';
+              }
+
               var gender = d3.nest()
                   .key(function(d){ return d['Gender']; })
                   .rollup(function(d){ return d.length; })
                   .entries(countryData).sort(sort_value);
 
-              var content = '<h4>' + d.properties.NAME_LONG + '</h4>';
-
-              content += 'Deployments: ' + numFormat(countryData.length) + '<br/>';
               content += 'UN agencies: ' + numFormat(orgs.length)+ '<br/>';
               //gender
               content += 'Gender: <ul>';

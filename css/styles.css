@@ -1225,7 +1225,7 @@ h4 {
   opacity: 0.8;
   padding-left: 5px;
   padding-top: 5px;
-  left: 5px;
+  left: 700px;
   width: 130px;
   position: absolute;
   /*.scale {
@@ -1261,6 +1261,9 @@ h4 {
 
 .hidden {
   display: none; }
+
+#nochart {
+  font-size: 12px; }
 
 .barchart .tick {
   font-size: 12px; }

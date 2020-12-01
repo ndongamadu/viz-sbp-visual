@@ -492,7 +492,7 @@ $( document ).ready(function() {
 
     var barchartPositionTitle = 'Deployments by Position',
         barchartOrgTitle = 'Deployments by Partner Organization',
-        barchartFunderTitle = 'Deployments by funder';
+        barchartFunderTitle = 'Deployments by Funder';
 
     $('#barcharts').append('<div class="barchart col-6"><div><h3 class="header">'+barchartPositionTitle+'</h3><div id="barchartPosition"></div></div>');
     // $('#barcharts').append('<div class="barchart col-6"><div><h3 class="header">'+barchartOrgTitle+'</h3><div id="barchartOrg"></div></div>');

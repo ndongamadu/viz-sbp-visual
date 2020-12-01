@@ -131,7 +131,7 @@ function getLegendItemToHide(data) {
 
 var barchartPosition,
 	barchartOrg,
-	barchartCountries;
+	barchartFunder;
 
 
 function generateBarChart(data, bind) {
@@ -208,8 +208,8 @@ function updateViz(filter) {
 	// update key figures
 	// createKeyFigure("#keyfig", "Deployments", "deployments", deployments);
     d3.select('.deployments').text(sbpFilteredData.length);
-    d3.select('.countries').text(countries.length);
-    d3.select('.dutyStations').text(dutyStations.length);
+    d3.select('.countries').text(countries.length-1);
+    d3.select('.dutyStations').text(dutyStations.length-1);
 
 	//update map
 	choroplethMap();
@@ -219,15 +219,18 @@ function updateViz(filter) {
 	var langData = getFormattedDataByIndicator('Language Requirements');
 	var genderData  = getFormattedDataByIndicator('Gender');
     var levelData  = getFormattedDataByIndicator('Grade');
+    var statusData  = getFormattedDataByIndicator('Met/Unmet');
 
 	donutLang.load({columns: langData, unload: true });
 	donutGender.load({columns: genderData, unload: true });
 	donutLevel.load({columns: levelData, unload: true });
+	donutStatus.load({columns: statusData, unload: true });
 
-	var positionData = getDataByIndicator('Functional Area');
-	var partnerData = getDataByIndicator('Partner/Organisation');
+	var positionData = getDataByIndicator('Functional');
+	// var partnerData = getDataByIndicator('Partner/Organisation');
+	var funderData = getDataByIndicator('Funded By');
 
-	var hauteur = (partnerData[0].length > 5) ? 500 : 250;
+	var hauteur = (funderData[0].length-1 > 5) ? 500 : 250;
 
 	if(positionData[0].length==2 && positionData[0][1]==""){
 		$('#nochart').remove();
@@ -239,11 +242,14 @@ function updateViz(filter) {
 		d3.select('#barchartPosition svg').classed('hidden', false);
 		barchartPosition.load({columns: positionData, unload: true });
 		barchartPosition.resize({height: hauteur });	
+
 	}
 
 	
-	barchartOrg.load({columns: partnerData, unload: true });
-	barchartOrg.resize({height: hauteur});
+	// barchartOrg.load({columns: partnerData, unload: true });
+	// barchartOrg.resize({height: hauteur});
+	barchartFunder.load({columns: funderData, unload: true });
+	barchartFunder.resize({height: hauteur});
 }	
 
 
@@ -380,11 +386,13 @@ var sort_value = function (d1, d2) {
 }
 var numFormat = d3.format(',');
 var percentFormat = d3.format('.0%');
-const DATA_URL = 'https://proxy.hxlstandard.org/api/data-preview.json?url=https%3A%2F%2Fdocs.google.com%2Fspreadsheets%2Fd%2F1exDoZsA8UQx-U5YGSS4zxivfPIOUf8-ts2CbavV7Mvg%2Fedit%23gid%3D255428484&format=csv';
+// const DATA_URL = 'https://proxy.hxlstandard.org/api/data-preview.json?url=https%3A%2F%2Fdocs.google.com%2Fspreadsheets%2Fd%2F1exDoZsA8UQx-U5YGSS4zxivfPIOUf8-ts2CbavV7Mvg%2Fedit%23gid%3D255428484&format=csv';
+const DATA_URL = 'https://proxy.hxlstandard.org/api/data-preview.json?url=https%3A%2F%2Fdocs.google.com%2Fspreadsheets%2Fd%2F1exDoZsA8UQx-U5YGSS4zxivfPIOUf8-ts2CbavV7Mvg%2Fedit%23gid%3D484816643&sheet=1&format=csv';
 let isMobile = $(window).width()<600? true : false;
 let geoDataURL = 'data/worldmap.json';
 
 let geomData, 
+    sbp,
     sbpData,
     sbpFilteredData;
 
@@ -401,6 +409,8 @@ let mapCountryColor = '#1EBFB3';//'#71D7CF';//'#C7EFEC';//'#1EBFB3';//'#009EDB';
 
 let zoom, g, mapsvg, markerScale;
 
+let yearFilter = $('#yearSelect').val();
+
 $( document ).ready(function() {
 
 
@@ -411,36 +421,31 @@ $( document ).ready(function() {
       d3.csv(DATA_URL)
     ]).then(function(data){
       geomData = topojson.feature(data[0], data[0].objects.geom);
-      sbpData = data[1];
+      sbp = data[1];
+      sbpData = sbp.filter(function(d){ return d['Deployment Year Started']==yearFilter; });
+      
+      sbpFilteredData = sbpData;
 
-      sbpData.forEach( function(element, index) {
+      sbpFilteredData.forEach( function(element, index) {
         countries.includes(element['ISO3 code']) ? '' : countries.push(element['ISO3 code']);
         dutyStations.includes(element['Duty Station']) ? '' : dutyStations.push(element['Duty Station']);
       });
 
-
-      sbpFilteredData = sbpData;
   
       dataByAgencies = d3.nest()
         .key(function(d){ return d['Organization']; })
         .rollup(function(d) { return d.length; })
-        .entries(sbpData).sort(sort_value);
+        .entries(sbpFilteredData).sort(sort_value);
 
       dataByRoster = d3.nest()
         .key(function(d){ return d['Partner/Organisation']; })
         .rollup(function(d) { return d.length; })
-        .entries(sbpData).sort(sort_value);
+        .entries(sbpFilteredData).sort(sort_value);
 
+      initDisplay();
       initMap();
       drawRankingChart(dataByAgencies);
-      initDisplay();
-      
-      
-       // key figures
-      var deployments = d3.sum(dataByAgencies, function(d){ return d.value;});
-      createKeyFigure("#keyfig", "Deployments", "deployments", deployments);
-      createKeyFigure("#keyfig", "Countries", "countries", countries.length);
-      createKeyFigure("#keyfig", "Duty Stations", "dutyStations", dutyStations.length);
+
  
       //remove loader and show vis
       $('.loader').hide();
@@ -449,14 +454,18 @@ $( document ).ready(function() {
   } //getData
 
   function initDisplay() {
+  // key figures
+    var deployments = d3.sum(dataByAgencies, function(d){ return d.value;});
+    createKeyFigure("#keyfig", "Deployments", "deployments", deployments);
+    createKeyFigure("#keyfig", "Countries", "countries", countries.length-1);
+    createKeyFigure("#keyfig", "Duty Stations", "dutyStations", dutyStations.length-1);
+ 
     // donut charts
     var langData = getFormattedDataByIndicator('Language Requirements');
     var genderData  = getFormattedDataByIndicator('Gender');
     var levelData  = getFormattedDataByIndicator('Grade');
-    var statusData = [
-            ['Met', 70],
-            ['Unmet', 30]
-        ];
+    var statusData = getFormattedDataByIndicator('Met/Unmet');
+
 
     var pieLangTitle = 'Language Requirements',
         pieGenderTitle = 'Deployments by Gender',
@@ -475,22 +484,21 @@ $( document ).ready(function() {
 
     // bar charts
 
-    var positionData = getDataByIndicator('Functional Area');
-    var partnerData = getDataByIndicator('Partner/Organisation');
-
-    // var positionData = getFormattedDataByIndicator('Title/Position/Function');
+    var positionData = getDataByIndicator('Functional');
+    //var partnerData = getDataByIndicator('Partner/Organisation');
+    var funderData = getDataByIndicator('Funded By');
 
     var barchartPositionTitle = 'Deployments by Position',
         barchartOrgTitle = 'Deployments by Partner Organization',
-        barchartCountriesTitle = 'Deployments by funding';
+        barchartFunderTitle = 'Deployments by funder';
 
     $('#barcharts').append('<div class="barchart col-6"><div><h3 class="header">'+barchartPositionTitle+'</h3><div id="barchartPosition"></div></div>');
-    $('#barcharts').append('<div class="barchart col-6"><div><h3 class="header">'+barchartOrgTitle+'</h3><div id="barchartOrg"></div></div>');
-    // $('#barcharts').append('<div class="barchart col-4"><div><h3 class="header">'+barchartCountriesTitle+'</h3><div id="barchartCountries"></div></div>');
+    // $('#barcharts').append('<div class="barchart col-6"><div><h3 class="header">'+barchartOrgTitle+'</h3><div id="barchartOrg"></div></div>');
+    $('#barcharts').append('<div class="barchart col-6"><div><h3 class="header">'+barchartFunderTitle+'</h3><div id="barchartFunder"></div></div>');
 
     barchartPosition = generateBarChart(positionData, 'barchartPosition');
-    barchartOrg = generateBarChart(partnerData, 'barchartOrg');
-
+    //barchartOrg = generateBarChart(partnerData, 'barchartOrg');
+    barchartFunder = generateBarChart(funderData, 'barchartFunder');
   } //initDisplay
 
 
@@ -663,7 +671,30 @@ $('#rankingSelect').on('change', function(e){
   d3.select('#rankingChart').select('svg').remove();
   drawRankingChart(data);
   updateViz();
-})
+});
+
+$('#yearSelect').on('change', function(e){
+  var newYear = $('#yearSelect').val();
+  if (newYear != yearFilter) {
+    yearFilter = newYear;
+    sbpData = sbp.filter(function(d){ return d['Deployment Year Started']==yearFilter; });
+    sbpFilteredData = sbpData;
+    //console.log(sbpData)
+    dataByAgencies = d3.nest()
+      .key(function(d){ return d['Organization']; })
+      .rollup(function(d) { return d.length; })
+      .entries(sbpFilteredData).sort(sort_value);
+
+    dataByRoster = d3.nest()
+      .key(function(d){ return d['Partner/Organisation']; })
+      .rollup(function(d) { return d.length; })
+      .entries(sbpFilteredData).sort(sort_value);
+
+    d3.select('#rankingChart').select('svg').remove();
+    drawRankingChart(dataByAgencies);
+    updateViz();
+  }
+});
 
   function initTracking() {
     //initialize mixpanel

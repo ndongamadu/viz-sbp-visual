@@ -702,6 +702,10 @@ $('#yearSelect').on('change', function(e){
       .rollup(function(d) { return d.length; })
       .entries(sbpFilteredData).sort(sort_value);
 
+    // reset select to default
+    var select = $('#rankingSelect').val();
+    select != 'months' ? $('#rankingSelect').val('months') : '';
+
     d3.select('#rankingChart').select('svg').remove();
     drawRankingChart(dataByAgencies);
     updateViz();

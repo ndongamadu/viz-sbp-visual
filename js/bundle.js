@@ -67,11 +67,30 @@ function drawRankingChart(data) {
 	    .attr('class', 'bar')
 	    .attr('fill', barColor)
 	    .attr('height', barHeight)
+	    .attr('x', 50)
 	    .attr('width', function(d) {
 	    	var w = x(d.value);
       		if (w<0) w = 0;
+      		if(w == x(maxVal)) w -= 50;
       		return w;
 	    });
+
+	var noLogo = ['Global'];
+	bars.append('image')
+		.attr('xlink:href', function(d){
+			var file = 'assets/logo/'+d.key+'.png';
+			noLogo.includes(d.key) ? file = '' : '';//'assets/logo/IOM.png' : '';
+			return file; 
+		})
+		.attr('width', 40)
+		.attr('height', 20)
+		.attr('x', function(d) {
+	      return 0;
+	    })
+	    .attr('y', function(d) { 
+	    	return -labelOffset -14; 
+	    });
+
 
 	 // add min/max labels
 	bars.append('text')
@@ -87,10 +106,14 @@ function drawRankingChart(data) {
 	bars.append('text')
 	    .attr('class', 'label-num')
 	    // .attr('text-anchor', 'start')
-	    .attr('x', 0)
+	    .attr('x', 50)
 	    .attr('y', function(d) { return -labelOffset; })
 	    .text(function (d) {
-	      return d.key;
+	    	var txt = d.key ;
+	    	if(d.key.length >21){
+	    		txt = text_truncate(txt, 21);
+	    	}
+	      return txt;
 	    });
 }
 
@@ -105,7 +128,7 @@ var colorArray = {
 function generatePieChart(data, bind) {
 	var chart = c3.generate({
 		bindto: '#'+bind,
-		size: { width: 190, height: 200},
+		size: { height: 200},
 		data: {
 			columns: data,
 			type: 'donut'
@@ -158,14 +181,19 @@ function generateBarChart(data, bind) {
 	          tick: {
 	          	outer: false,
 	          	multiline: false,
-	          	culling: false
+	          	fit: true,
+	          	culling: false,
+	          	// format: function(x){ 
+	          	// 	var catname = this.api.categories()[x];
+	          	// 	return text_truncate(catname, 30) ; 
+	          	// }
 	          }
 	      },
 	      y: {
 	      	tick: {
 	      		outer: false,
 	      		format: d3.format('d'),
-	      		count: 5,
+	      		count: 5
 	      	}
 	      } 
 	    },
@@ -219,12 +247,12 @@ function updateViz(filter) {
 	var langData = getFormattedDataByIndicator('Language Requirements');
 	var genderData  = getFormattedDataByIndicator('Gender');
     var levelData  = getFormattedDataByIndicator('Grade');
-    var statusData  = getFormattedDataByIndicator('Met/Unmet');
+    // var statusData  = getFormattedDataByIndicator('Met/Unmet');
 
 	donutLang.load({columns: langData, unload: true });
 	donutGender.load({columns: genderData, unload: true });
 	donutLevel.load({columns: levelData, unload: true });
-	donutStatus.load({columns: statusData, unload: true });
+	// donutStatus.load({columns: statusData, unload: true });
 
 	var positionData = getDataByIndicator('Functional');
 	// var partnerData = getDataByIndicator('Partner/Organisation');
@@ -339,6 +367,19 @@ function hxlProxyToJSON(input){
     return output;
 }
 
+text_truncate = function(str, length, ending) {
+    if (length == null) {
+      length = 100;
+    }
+    if (ending == null) {
+      ending = '...';
+    }
+    if (str.length > length) {
+      return str.substring(0, length - ending.length) + ending;
+    } else {
+      return str;
+    }
+};
 
 function createKeyFigure(target, title, className, value) {
   var targetDiv = $(target);
@@ -362,6 +403,22 @@ function getFormattedDataByIndicator(indicator) {
 
    return data; 
 
+}
+
+function loadImg(url, done){
+    var xhr = new XMLHttpRequest();
+    xhr.onload = function () { return done(this.status) }
+    xhr.open('HEAD', url, true);
+    xhr.send();
+}
+
+function imageExists (url) {
+    var test = true;
+    loadImg(url, function(status){
+        if (status == 404) test = false;
+    });
+
+    return test;
 }
 
 function getDataByIndicator(indicator) {
@@ -389,8 +446,8 @@ var sort_value = function (d1, d2) {
 }
 var numFormat = d3.format(',');
 var percentFormat = d3.format('.0%');
-// const DATA_URL = 'https://proxy.hxlstandard.org/api/data-preview.json?url=https%3A%2F%2Fdocs.google.com%2Fspreadsheets%2Fd%2F1exDoZsA8UQx-U5YGSS4zxivfPIOUf8-ts2CbavV7Mvg%2Fedit%23gid%3D255428484&format=csv';
-const DATA_URL = 'https://proxy.hxlstandard.org/api/data-preview.json?url=https%3A%2F%2Fdocs.google.com%2Fspreadsheets%2Fd%2F1exDoZsA8UQx-U5YGSS4zxivfPIOUf8-ts2CbavV7Mvg%2Fedit%23gid%3D484816643&sheet=1&format=csv';
+const DATA_URL = 'https://proxy.hxlstandard.org/api/data-preview.json?url=https%3A%2F%2Fdocs.google.com%2Fspreadsheets%2Fd%2F15Y2BzrOHy_8Vh1BvO1FuotowdtFQHOUtedguzLGdhQA%2Fedit%23gid%3D306007431&format=csv';
+// const DATA_URL = 'https://proxy.hxlstandard.org/api/data-preview.json?url=https%3A%2F%2Fdocs.google.com%2Fspreadsheets%2Fd%2F1exDoZsA8UQx-U5YGSS4zxivfPIOUf8-ts2CbavV7Mvg%2Fedit%23gid%3D484816643&sheet=1&format=csv';
 let isMobile = $(window).width()<600? true : false;
 let geoDataURL = 'data/worldmap.json';
 
@@ -429,7 +486,9 @@ $( document ).ready(function() {
         (element[monthColLabel] == "na") ? element[monthColLabel] = 0 : '';
       });
       sbp = data[1];
-      sbpData = sbp.filter(function(d){ return d['Deployment Year Started']==yearFilter; });
+      sbpData = sbp.filter(function(d){ 
+        return (d['Deployment Year Started']==yearFilter && d['Met/Unmet']=='Met'); 
+      });
       
       sbpFilteredData = sbpData;
 
@@ -472,7 +531,7 @@ $( document ).ready(function() {
     var langData = getFormattedDataByIndicator('Language Requirements');
     var genderData  = getFormattedDataByIndicator('Gender');
     var levelData  = getFormattedDataByIndicator('Grade');
-    var statusData = getFormattedDataByIndicator('Met/Unmet');
+    // var statusData = getFormattedDataByIndicator('Met/Unmet');
 
 
     var pieLangTitle = 'Language Requirements',
@@ -480,15 +539,15 @@ $( document ).ready(function() {
         pieLevelTitle = 'Deployments by Level',
         pieStatusTitle = 'Deployments Status';
 
-    $('#piecharts').append('<div class="pie col-3"><div><h3 class="header">'+pieLangTitle+'</h3><div id="pieLang"></div></div>');
-    $('#piecharts').append('<div class="pie col-3"><div><h3 class="header">'+pieGenderTitle+'</h3><div id="pieGender"></div></div>');
-    $('#piecharts').append('<div class="pie col-3"><div><h3 class="header">'+pieLevelTitle+'</h3><div id="pieLevel"></div></div>');
-    $('#piecharts').append('<div class="pie col-3"><div><h3 class="header">'+pieStatusTitle+'</h3><div id="pieStatus"></div></div>');
+    $('#piecharts').append('<div class="pie col-4"><div><h3 class="header">'+pieLangTitle+'</h3><div id="pieLang"></div></div>');
+    $('#piecharts').append('<div class="pie col-4"><div><h3 class="header">'+pieGenderTitle+'</h3><div id="pieGender"></div></div>');
+    $('#piecharts').append('<div class="pie col-4"><div><h3 class="header">'+pieLevelTitle+'</h3><div id="pieLevel"></div></div>');
+    // $('#piecharts').append('<div class="pie col-3"><div><h3 class="header">'+pieStatusTitle+'</h3><div id="pieStatus"></div></div>');
 
     donutLang = generatePieChart(langData, 'pieLang');
     donutGender = generatePieChart(genderData, 'pieGender');
     donutLevel = generatePieChart(levelData, 'pieLevel');
-    donutStatus = generatePieChart(statusData, 'pieStatus');
+    // donutStatus = generatePieChart(statusData, 'pieStatus');
 
     // bar charts
 
@@ -513,8 +572,8 @@ $( document ).ready(function() {
   function drawMap(){
     var width = $('#map').width();//viewportWidth;
     var height = 400;//(isMobile) ? viewportHeight * .5 : viewportHeight;
-    var mapScale = width/3.5;//(isMobile) ? width/3.5 : width/5.5;
-    var mapCenter = [75, 8];//(isMobile) ? [10, 30] : [75, 8];
+    var mapScale = width/5.5;//(isMobile) ? width/3.5 : width/5.5;
+    var mapCenter = [25, 8];//(isMobile) ? [10, 30] : [75, 8];
 
 
     var projection = d3.geoMercator()
@@ -522,19 +581,15 @@ $( document ).ready(function() {
       .scale(mapScale)
       .translate([width / 2, height / 2]);
 
-    // zoom = d3.zoom()
-    //   .scaleExtent([1, 8])
-    //   .on("zoom", zoomed);
-
     var path = d3.geoPath().projection(projection);
 
     mapsvg = d3.select('#map')
                .append('svg')
                .attr("width", width)
                .attr("height", height);
-      //.call(zoom)
-      // .on("wheel.zoom", null)
-      // .on("dblclick.zoom", null);
+               // .call(zoom)
+               // .on("wheel.zoom", null)
+               // .on("dblclick.zoom", null);
 
     mapsvg.append("rect")
       .attr("width", "100%")
@@ -622,6 +677,9 @@ $( document ).ready(function() {
     }, 100);
   }
 
+function zoomed (argument) {
+  console.log("zoomed")
+}
 
   function showMapTooltip(d, maptip, text){
     var mouse = d3.mouse(mapsvg.node()).map( function(d) { return parseInt(d); } );
@@ -689,7 +747,7 @@ $('#yearSelect').on('change', function(e){
   var newYear = $('#yearSelect').val();
   if (newYear != yearFilter) {
     yearFilter = newYear;
-    sbpData = sbp.filter(function(d){ return d['Deployment Year Started']==yearFilter; });
+    sbpData = sbp.filter(function(d){ return (d['Deployment Year Started']==yearFilter && d['Met/Unmet']=='Met');  });
     sbpFilteredData = sbpData;
     //console.log(sbpData)
     dataByAgencies = d3.nest()

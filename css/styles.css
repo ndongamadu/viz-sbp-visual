@@ -1138,7 +1138,8 @@ main {
   opacity: 0; }
 
 h1 {
-  font-size: 30px; }
+  margin-top: 0;
+  text-align: center; }
 
 h3 {
   color: #000;
@@ -1157,6 +1158,13 @@ h4 {
   font-size: 14px;
   margin: 0;
   padding-bottom: 5px; }
+
+.center {
+  display: block;
+  margin-left: auto;
+  margin-right: auto;
+  height: 80px;
+  margin-top: 10px; }
 
 .checks {
   display: flex;

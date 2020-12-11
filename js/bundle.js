@@ -83,7 +83,7 @@ function drawRankingChart(data) {
 			return file; 
 		})
 		.attr('width', 40)
-		.attr('height', 20)
+		.attr('height', 35)
 		.attr('x', function(d) {
 	      return 0;
 	    })

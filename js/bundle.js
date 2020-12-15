@@ -75,13 +75,15 @@ function drawRankingChart(data) {
       		return w;
 	    });
 
-	var noLogo = ['Global'];
+	var noLogo = ['Global', 'Ministry of Foreign Affairs Iceland',
+				  'Emergency Services Academy Finland (Pelastusopoisto)'];
 	bars.append('image')
 		.attr('xlink:href', function(d){
 			var file = 'assets/logo/'+d.key+'.png';
-			noLogo.includes(d.key) ? file = '' : '';//'assets/logo/IOM.png' : '';
+			noLogo.includes(d.key) ? file = 'assets/logo/generic.png' : '';
 			return file; 
 		})
+		// .attr('border-radius', 50)
 		.attr('width', 40)
 		.attr('height', 35)
 		.attr('x', function(d) {

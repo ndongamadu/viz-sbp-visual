@@ -139,7 +139,8 @@ function generatePieChart(data, bind) {
 			pattern: colorArray[bind]
 		},
 		legend: {
-			hide: getLegendItemToHide(data)
+			//hide: getLegendItemToHide(data)
+			show: true
 		}
 	});
 
@@ -158,9 +159,21 @@ var barchartPosition,
 	barchartOrg,
 	barchartFunder;
 
+var barchartTicks = {
+	          	outer: false,
+	          	multiline: false,
+	          	fit: true,
+	          };
 
 function generateBarChart(data, bind) {
 	var hauteur = (data[0].length > 5) ? 500 : 250;
+	var funderTicks = {
+			    outer: false,
+	          	multiline: true,
+	          	multilineMax: 1,
+	          	fit: true,
+			};
+	var ticks = (bind == "barchartFunder") ? ticks = funderTicks : barchartTicks;
 	var chart = c3.generate({
 		bindto: '#'+bind,
 		size: { height: hauteur },
@@ -180,16 +193,7 @@ function generateBarChart(data, bind) {
 	        rotated : true,
 	      x: {
 	          type : 'category',
-	          tick: {
-	          	outer: false,
-	          	multiline: false,
-	          	fit: true,
-	          	culling: false,
-	          	// format: function(x){ 
-	          	// 	var catname = this.api.categories()[x];
-	          	// 	return text_truncate(catname, 30) ; 
-	          	// }
-	          }
+	          tick: ticks
 	      },
 	      y: {
 	      	tick: {

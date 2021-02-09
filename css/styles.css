@@ -1148,6 +1148,10 @@ h1 {
   margin: 0;
   padding: 0 0 0 20px; }
 
+h1 span {
+  font-size: 10px;
+  font-weight: normal; }
+
 h3 {
   color: #000;
   font-family: 'Gotham-Bold', sans-serif;

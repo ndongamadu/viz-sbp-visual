@@ -136,7 +136,7 @@ function generatePieChart(data, bind) {
 		},
 		legend: {
 			//hide: getLegendItemToHide(data)
-			show: true
+			show: false
 		}
 	});
 
@@ -162,7 +162,7 @@ var barchartTicks = {
 	          };
 
 function generateBarChart(data, bind) {
-	var hauteur = (data[0].length > 5) ? 500 : 250;
+	var hauteur = (data[0].length > 5) ? 750 : 250;
 	var funderTicks = {
 			    outer: false,
 	          	multiline: true,
@@ -260,7 +260,7 @@ function updateViz(filter) {
 	// var partnerData = getDataByIndicator('Partner/Organisation');
 	var funderData = getDataByIndicator('Funded By');
 
-	var hauteur = (funderData[0].length-1 > 5) ? 500 : 250;
+	var hauteur = (funderData[0].length-1 > 5) ? 750 : 250;
 
 	if(positionData[0].length==2 && positionData[0][1]==""){
 		$('#nochart').remove();
